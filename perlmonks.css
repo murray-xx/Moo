@@ -1,0 +1,78 @@
+/* This CSS controls presentation details common to all six original themes. */
+
+h3.superdoc {
+   font-size:  28px;
+  font-family: "Old English Text MT", linotext, rudelsburg, goodcitymodern, arnoldboecklin, agate, lucidabright, becker, Palatino, "Palatino Linotype", Harrington, serif;
+}
+span.attribution, span.addlinks { font-size: smaller; }
+input.titlebar {
+  background-color: inherit;
+  color:            inherit;
+  font-size:        inherit;
+  font-family:      inherit;
+  font-weight:      inherit;
+  border-width:     0;
+}
+tr.titlebar {
+  height:           55px;
+  font-size:        24px;
+  font-weight:      bold;
+  font-family:      lucidabright, agate, goudyoldstyle, goodcitymodern, linotext, rudelsberg, becker, arnoldboecklin, caligula, serif;
+}
+a.titlebar:link, a.titlebar:visited {
+  text-decoration: none;
+}
+tbody.nodelet td { font-size: 12px; }
+tbody.nodelet th { font-weight: bold; }
+tbody.nodelet th a { text-decoration: none; }
+form { display: inline }
+span.title    { float: left  }
+span.controls { float: right }
+body {
+  color:            #000000;
+  background-color: #FFFFF2;
+}
+td { color: #000000; }
+tr.titlebar { background-color: #006699; }
+tr.section_title {
+  color:            #FFFFFF;
+  background-color: #006699;
+}
+td.section_title {
+  color:            #FFFFFF;
+  background-color: #006699;
+}
+tr.post_head, tr.highlight { background-color: #CCCCCC; }
+td.titlebar { color: #FFFFFF; }
+table.nodelet_container { background-color: #006699; }
+a:link    { color: #CC0000  }
+a:visited { color: #333399 }
+a.titlebar:link, a.titlebar:visited { color:  #FFFFFF; }
+tbody.nodelet td, td.nodebody { background-color: #FFFFFF; }
+tbody.nodelet th, th.nodehead {
+  color:             #FFFFFF;
+  background-color:  #006699;
+}
+tbody.nodelet th a:link, tbody.nodelet th { 
+	color: #FFFFFF; 
+	background-color:  #006699;
+}
+pre { 
+    display: block;
+    background-color: #FFFFF2;
+    border: 1px solid #000066;
+    width: 90%; 
+    padding: 0px 2ex 2ex 2ex; 
+}
+/* auto-sizing text areas (courtesy of tye) */
+textarea { 
+	width: 100% 
+}
+/* bland signatures (courtesy of tye) */
+div.pmsig, div.pmsig td, div.pmsig font { 
+	color: black; 
+	background-color: inherit; 
+	font-size: 10px; 
+	font-family: serif; 
+} 
+
