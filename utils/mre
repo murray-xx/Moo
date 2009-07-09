@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+# 
+# mre - Most REcent
+#
+# ever cd to a directory with some many thousands of files it takes
+# forever to do an ls? mre to the rescue
+# just lists the most recent file in the directory, quickly
+#
+# you can do this with it 
+#    tail `mre` 
+#
+# Murray Barton - <http://incommunique.blogspot.com/>
+#
+# Copyright (c) 2003. Murray Barton. All rights reserved.
+# 
+# This program is free software; you can redistribute it and/or 
+# modify it under the same terms as Perl itself.
+# 
+# See http://www.perl.com/perl/misc/Artistic.html
+#
+
+
+use strict;
+use warnings;
+
+my $dir = $ARGV[0] || ".";
+
+my $latest;
+$latest->{tstamp}   = 0;
+$latest->{filename} = "No files found in $dir";
+
+opendir(DIR , $dir) || die "Could not opendir $dir: $!\n";
+chdir($dir);
+
+for ( readdir DIR ){
+	next unless -f;
+  my $tstamp = (stat)[9] || 0;
+	if ($tstamp > $latest->{tstamp}){
+		$latest->{filename} = $_;
+		$latest->{tstamp}   = $tstamp;
+	}
+}
+closedir(DIR);
+print $latest->{filename}, "\n";
