@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # use it like this PATH=`path_edit.pl -/some/path +/some/other/path`
 #     + apends to path
@@ -8,8 +8,23 @@
 #    PATH=`path_edit.pl +/appl/scripts || echo $PATH`
 # so that if for some reason we die $PATH will retain it's original value...
 #
+# Murray Barton - <http://incommunique.blogspot.com/>
+# 
+# Copyright (c) 2003. Murray Barton. All rights reserved.
+# 
+# This program is free software; you can redistribute it and/or 
+# modify it under the same terms as Perl itself.
+# 
+# See http://www.perl.com/perl/misc/Artistic.html
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
 
 use strict;
+use warnings;
+
 my $verbose = 0;
 
 my %path;
