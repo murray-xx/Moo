@@ -43,6 +43,12 @@ if ( $removedups ){
     my $last;
     for ( 0..$#dups ){
         my $file = $dups[$_];
+
+        # if the file expansion on the command line doesn't result in any files
+        # then we get errors, because this script gets handed ie /path/to/pattern/<something>.* 
+        # which doesn't exist.  So we just step over those ones.
+        next if ! -e $file;
+
         my $md5 = md5sum($file);
         if ( ! $last ){
             $last = $md5;

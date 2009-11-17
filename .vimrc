@@ -18,7 +18,6 @@ set ignorecase
 set smartcase
 set title
 set scrolloff=3
-set listchars=tab:»·,trail:·
 set list
 
 
@@ -34,6 +33,7 @@ set directory=/home/perth/wopmbn/.vim/vim_swp
 
 if has('syntax') && (&t_Co > 2 || has('win32') || has('gui_running'))
     syntax enable
+    set listchars=tab:»·,trail:·
 endif
 
 ":colorscheme mod_tcsoft 
@@ -56,3 +56,5 @@ noremap <C-E>    <End>
 " F3 toggles highlight search on and off
 map <F3> :set hls!<bar>set hls?<CR>
 
+map ,pt  <Esc>:%! perltidy<CR>
+map ,ptv <Esc>:'<,'>! perltidy<CR>
