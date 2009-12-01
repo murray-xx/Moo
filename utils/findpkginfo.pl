@@ -12,13 +12,13 @@ $| = 1;
 my ( $stdio, $filename );
 
 GetOptions(
-    ''    => \$stdio,      # lone dash read from stdio!
-    'f=s' => \$filename,
-    'usage' => sub { pod2usage( -verbose => 0 ) && exit 0 },
-    'help|?' => sub { pod2usage( -verbose => 1 ) && exit 0 },
-    'man'    => sub { pod2usage( -verbose => 2 ) && exit 0 },
+    ''       => \$stdio,      # lone dash read from stdio!
+    'f=s'    => \$filename,
+    'usage'  => sub { pod2usage( -verbose => 0, -exitval => 1 ) },
+    'help|?' => sub { pod2usage( -verbose => 1, -exitval => 1 ) },
+    'man'    => sub { pod2usage( -verbose => 2, -exitval => 1 ) },
     'version|V' => sub { print basename($0), " $main::VERSION\n"; exit 0 },
-) or pod2usage( -verbose => 0 ) && exit 0;
+) or pod2usage( -verbose => 0, -exitval => 1 );
 
 if ( ( !$stdio and !$filename ) or ( $stdio and $filename ) ) {
 
@@ -117,24 +117,20 @@ sub print_pkg {
 
  find package info in the output of pkginfo -l from either a pipe or a file
  <search string> can be any valid perl regular expression
-    
+
 =head1 OPTIONS
 
-=over 0
-
  -
-	read pkginfo from STDIN 
-	ie pkginfo -l | findpkginfo.pl -
+    read pkginfo from STDIN 
+    ie pkginfo -l | findpkginfo.pl -
  -f <filename>
-	read pkginfo from <filename>
+    read pkginfo from <filename>
  --help 
      Print this message
  --man
     Print the man page
  --version|-V
     Print the program version number
-
-=back
 
 =head1 BUGS
 

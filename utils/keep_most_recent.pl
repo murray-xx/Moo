@@ -110,6 +110,7 @@ sub md5sum{
 =head1 OPTIONS
 
 =over 6
+
  --keep <x>
     number of files to keep
  --removedups
