@@ -1,44 +1,51 @@
 #!/usr/bin/perl
-# 
-# mre - Most REcent
-#
-# ever cd to a directory with some many thousands of files it takes
-# forever to do an ls? mre to the rescue
-# just lists the most recent file in the directory, quickly
-#
-# you can do this with it 
-#    tail `mre` 
-#
-# Murray Barton - <http://incommunique.blogspot.com/>
-#
-# Copyright (c) 2003. Murray Barton. All rights reserved.
-# 
-# This program is free software; you can redistribute it and/or 
-# modify it under the same terms as Perl itself.
-# 
-# See http://www.perl.com/perl/misc/Artistic.html
-#
-
 
 use strict;
 use warnings;
 
+my $list_mode = 0;
+
+if ( defined $ARGV[0] and $ARGV[0] =~ m|^-{1,2}(\d+)$| ){
+    # ahh they want us to list the "x" most recent, sweet
+    $list_mode = $1;
+    shift @ARGV;
+}
 my $dir = $ARGV[0] || ".";
 
 my $latest;
+my %files;
 $latest->{tstamp}   = 0;
 $latest->{filename} = "No files found in $dir";
 
-opendir(DIR , $dir) || die "Could not opendir $dir: $!\n";
+opendir(my $dh , $dir) || die "Could not opendir $dir: $!";
+
+# cd to $dir because readdir just gives filenames and without the chdir
+# we would have to prepend $dir to $_ to do stuff to them  (-f and stat)
 chdir($dir);
 
-for ( readdir DIR ){
-	next unless -f;
-  my $tstamp = (stat)[9] || 0;
-	if ($tstamp > $latest->{tstamp}){
-		$latest->{filename} = $_;
-		$latest->{tstamp}   = $tstamp;
-	}
+for ( readdir $dh ){
+    lstat $_;
+    next unless -f _;
+    next if -l _;
+    my $tstamp = (stat)[9] || 0;
+    if ( $list_mode > 0 ){
+        $files{$_} = $tstamp;
+    }
+    elsif ($tstamp > $latest->{tstamp}){
+        $latest->{filename} = $_;
+        $latest->{tstamp}   = $tstamp;
+    }
 }
-closedir(DIR);
-print $latest->{filename}, "\n";
+closedir $dh;
+
+if ( $list_mode > 0 ){
+    my $cnt = 1;
+    for ( reverse sort { $files{$a} <=> $files{$b} } keys %files ){
+        print "$_\n";
+        last if $cnt >= $list_mode;
+        ++$cnt;
+    }
+}
+else {
+    print $latest->{filename}, "\n";
+}
