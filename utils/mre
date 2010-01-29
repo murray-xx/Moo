@@ -1,7 +1,84 @@
 #!/usr/bin/perl
+#
+
+=head1 NAME
+
+mre
+
+=head1 SYNOPSIS
+
+mre [-x] /path/to/dir
+
+=head1 DESCRIPTION
+    
+list the Most REcent file(s) in a directory
+
+with no other arguments lists the most recent file in the pwd
+
+with a dir as an argument lists the most recent file in dir
+
+This utility was born out of desperation from doing ls's in directories with tens of thousands
+of files.  The ls would take way too long to process.  mre is quick.
+
+Favourite useage 
+    tail `mre /path/to/dir`
+
+=head1 OPTIONS
+
+ -x
+    where "x" is a number: list the most recent x files
+ --help
+    Print this message.
+ --man
+    Print the man page.
+ --version|-V
+    Print the program version number.
+
+=head1 BUGS
+
+None that I know of :-)
+
+=head1 AUTHOR
+
+Murray Barton
+email: murray.barton at gmail.com
+http://incommunique.blogspot.com
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003. Murray Barton. All rights reserved.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=head1 DISCLAIMER
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
+
+$VERSION = "0.2";
 
 use strict;
 use warnings;
+use Getopt::Long qw(:config pass_through);
+use Pod::Usage;
+use File::Basename;
+
+my $verbose = 0;
+
+GetOptions(
+    'usage'      => sub { pod2usage(-verbose => 0, -exitval => 0) }, 
+    'help|?'     => sub { pod2usage(-verbose => 1, -exitval => 0) }, 
+    'man'        => sub { pod2usage(-verbose => 2, -exitval => 0) }, 
+    'version|V'  => sub { print basename($0), " v$main::VERSION\n";  exit 0}, 
+);
+
 
 my $list_mode = 0;
 
@@ -49,3 +126,5 @@ if ( $list_mode > 0 ){
 else {
     print $latest->{filename}, "\n";
 }
+
+
