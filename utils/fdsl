@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+#
+# find dangling symlinks
+#
+
+use strict;
+use warnings;
+use File::Find;
+
+for ( @ARGV ){
+    find(\&wanted, $_);
+}
+
+sub wanted {
+    my $file = $File::Find::name;
+    /.snapshot/ and $File::Find::prune = 1;
+    return unless -l $file;
+    #print "[$file]\n";
+    my $dest = readlink($file);
+    if ( ! -e $dest ){
+        print "$file -> $dest\n";
+    }
+}
