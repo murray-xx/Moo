@@ -1,12 +1,90 @@
 #!/usr/bin/perl
 #
-# address.pl
-#
 
-$VERSION = '0.8.1';
+=head1 NAME
 
-use warnings;
+address.pl
+
+=head1 SYNOPSIS
+
+address.pl [-s -p -a --usage --help -? -man -version -V] [search_pattern]
+
+=head1 DESCRIPTION
+
+Simple command line search of the CSV file export of my GMail contacts
+
+Why? Because it's easier to type "address.pl andrew" than to point and click
+my way through gmail's contacts (or any other GUI for that matter, this
+isn't a complaint about gmail)
+
+=head1 OPTIONS
+
+-s|-a
+    search all fields
+
+-p
+    print all fields with values for matching records
+
+-d
+    print some debugging information
+
+--help|-?
+    Print this message
+
+--man
+    Print the man page
+
+--usage
+    print the usage line
+
+--version|-V
+    Print the program version number
+
+=head1 BUGS
+
+None that I know of :)  Use at your own risk!
+
+=head1 To Do/Wishlist
+
+
+=head1 Credits
+
+Juerd for "POD in 5 minutes" <http://perlmonks.org/?node_id=252477> and
+ybiC for "The Dynamic Duo" <http://perlmonks.org/?node_id=155288>
+
+Damian Conway for writing Perl Best Practices which prompted me to learn
+Getopt::Long and do a better job of handling command line arguments.  Any bugs 
+in implementation are still mine.
+
+All the very cool module authors on CPAN, THANK-YOU!
+
+=head1 AUTHOR
+
+Murray Barton
+email: murray.barton at gmail.com
+http://incommunique.blogspot.com
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003. Murray Barton. All rights reserved.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=head1 DISCLAIMER
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
+$VERSION = '0.8.2';
+
 use strict;
+use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Pod::Usage;
 use File::Basename;
@@ -148,71 +226,4 @@ sub special_sort {
       || $a cmp $b;
 }
 
-=head1 NAME
-
-address.pl
-
-=head1 SYNOPSIS
-
-address.pl [-s -p -a --usage --help -? -man -version -V] [search_pattern]
-
-=head1 DESCRIPTION
-
-Simple command line search of the CSV file export of my GMail contacts
-
-=head1 OPTIONS
-
--s|-a
-    search all fields
-
--p
-    print all fields with values for matching records
-
--d
-    print some debugging information
-
---help|-?
-    Print this message
-
---man
-    Print the man page
-
---usage
-    print the usage line
-
---version|-V
-    Print the program version number
-
-=head1 BUGS
-
-None that I know of :)  Use at your own risk!
-
-=head1 To Do/Wishlist
-
-
-=head1 Credits
-
-Juerd for "POD in 5 minutes" <http://perlmonks.org/?node_id=252477> and
-ybiC for "The Dynamic Duo" <http://perlmonks.org/?node_id=155288>
-
-Damian Conway for writing Perl Best Practices which prompted me to learn
-Getopt::Long and do a better job of handling command line arguments.  Any bugs 
-in implementation are still mine.
-
-All the very cool module authors on CPAN, THANK-YOU!
-
-=head1 AUTHOR
-
-Murray Barton - <http://www.insubstantial.com.au/>
-
-=head1 COPYRIGHT
-
-Copyright (c) 2003. Murray Barton. All rights reserved.
-
-This program is free software; you can redistribute it and/or 
-modify it under the same terms as Perl itself.
-
-See http://www.perl.com/perl/misc/Artistic.html
-
-=cut
 
