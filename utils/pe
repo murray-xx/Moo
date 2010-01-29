@@ -1,6 +1,66 @@
 #!/usr/bin/perl
 #
-#
+
+=head1 NAME
+
+    pe
+
+=head1 SYNOPSIS
+
+    pe +/some/path -/some/other/path
+
+=head1 DESCRIPTION
+
+ Add or remove items from path
+
+ use it like this 
+    PATH=`pe -/some/path +/some/other/path`
+        + apends to path
+        ++ prepends to path
+        - removes from path
+
+ or better still like this-
+    PATH=`pe +/your/additional/path || echo $PATH`
+ so that if for some reason we die $PATH will retain it's original value...
+
+=head1 OPTIONS
+
+ --verbose
+    Be noisy about what we are doing...
+ --help
+    Print this message.
+ --man
+    Print the man page.
+ --version|-V
+    Print the program version number.
+
+=head1 BUGS
+
+None that I know of :-)
+
+=head1 AUTHOR
+
+    Murray Barton
+    email: murray.barton at gmail.com
+    http://incommunique.blogspot.com
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003. Murray Barton. All rights reserved.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=head1 DISCLAIMER
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
 
 $VERSION = '0.7';
 
@@ -74,63 +134,4 @@ sub add_dir {
     $path{$dir} = $end;
 }
 
-=head1 NAME
-
-    pe
-
-=head1 SYNOPSIS
-
-    pe +/some/path -/some/other/path
-
-=head1 DESCRIPTION
-
- Add or remove items from path
-
- use it like this 
-    PATH=`pe -/some/path +/some/other/path`
-        + apends to path
-        ++ prepends to path
-        - removes from path
-
- or better still like this-
-    PATH=`pe +/your/additional/path || echo $PATH`
- so that if for some reason we die $PATH will retain it's original value...
-
-=head1 OPTIONS
-
- --verbose
-    Be noisy about what we are doing...
- --help
-    Print this message.
- --man
-    Print the man page.
- --version|-V
-    Print the program version number.
-
-=head1 BUGS
-
-None that I know of :-)
-
-=head1 AUTHOR
-
-    Murray Barton
-    email: murray.barton at gmail.com
-    http://incommunique.blogspot.com
-
-=head1 COPYRIGHT
-
-Copyright (c) 2003. Murray Barton. All rights reserved.
-
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-See http://www.perl.com/perl/misc/Artistic.html
-
-=head1 DISCLAIMER
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty
- of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-=cut
 
