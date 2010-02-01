@@ -12,7 +12,7 @@
 [[ $- == *i* ]] && _shell_is_interactive=1
 
 [ -f $HOME/.bashrc.local ] && . $HOME/.bashrc.local
-path_edit=~/bin/path_edit.pl
+path_edit=~/bin/pe
 
 PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/local/sbin:/usr/sbin
 MANPATH=/usr/local/man:/usr/man:/usr/share/man:/usr/kerberos/man
@@ -82,7 +82,7 @@ HISTCONTROL=ignoredups
 
 HISTFILE=$HOME/.bash_history/${HOSTNAME}
 if [ $EUID -eq 0  -o "$LOGNAME" = "root" ]; then
-	export TMOUT=600;
+    export TMOUT=600;
     HISTFILE=${HISTFILE}.root
     PS1="${TITLEBAR}\[\033[0;31m\][\h \w]# \[\033[0m\]"
     alias rm='rm -i'
@@ -101,11 +101,12 @@ alias path='echo $PATH'
 alias root='sudo $BASH'
 alias isodate='date +"%Y%m%d"'
 alias epochs='perl -leprint+time'
+[ -x /usr/local/bin/firefox ] && alias firefox='/usr/local/bin/firefox'
+[ -x ~/bin/cal ]              &&  alias cal='~/bin/cal'
+[ -x /nfs/apps/common/ph ]    && alias ph='/nfs/apps/common/ph'
+
 #graphical representation of the current sub-directories
 alias gls=" ls -R | grep \":$\" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
-
-
-[ -x /appl/scripts/ph ] && alias ph='/appl/scripts/ph'
 
 case $OSTYPE in
     solaris*)
@@ -117,7 +118,7 @@ case $OSTYPE in
         else 
             alias ls='ls -CF'
         fi
-		unset solaris2_ls
+        unset solaris2_ls
 
         if [ "$ver" = "5.9" -o "$ver" = "5.8" ]; then
             solaris2_df="/appl/Solaris2/bin/df"
@@ -127,9 +128,9 @@ case $OSTYPE in
             unset solaris2_df
         fi
 
-		sccs="/usr/ccs/bin"
+        sccs="/usr/ccs/bin"
         if [ -x $sccs ]; then
-			alias sccs="$sccs"
+            alias sccs="$sccs"
         fi
         unset sccs
 
@@ -144,7 +145,7 @@ case $OSTYPE in
                 alias ps='/usr/bin/ps -o zone,user,pid,ppid,c,stime,tty,time,args'
             fi
         fi
-		alias pstree='ptree'
+        alias pstree='ptree'
 
         # erk, on solaris "which" is a csh script 
         alias which="$HOME/bin/which"
@@ -153,9 +154,9 @@ case $OSTYPE in
         unset ver
     ;;
     linux*)
-		alias pstree='pstree -a -c -l -n -h -p'
+        alias pstree='pstree -a -c -l -n -h -p'
         alias ls='ls --color -CF'
-        if [ `hostname` == "flexo" ]; then
+        if [ `hostname` == "oak.insubstantial.com.au" ]; then
             alias gvim='gvim --remote-tab-silent'
         fi
     ;;
