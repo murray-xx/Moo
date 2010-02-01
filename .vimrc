@@ -18,8 +18,6 @@ set ignorecase
 set smartcase
 set title
 set scrolloff=3
-set list
-
 
 set shiftround " when at 3 spaces, and I hit > ... go to 4, not 5
 
@@ -28,14 +26,16 @@ set history=1000
 
 
 " store all of your vim swp files in one place, make sure this directory exists
-set backupdir=/home/perth/wopmbn/.vim/vim_swp
-set directory=/home/perth/wopmbn/.vim/vim_swp
+set backupdir=~/.vim/vim_swp
+set directory=~/.vim/vim_swp
 
 if has('syntax') && (&t_Co > 2 || has('win32') || has('gui_running'))
     syntax enable
+    set list
     set listchars=tab:»·,trail:·
 endif
 
+"see http://vimcolorschemetest.googlecode.com/svn/html/index-c.html
 ":colorscheme mod_tcsoft 
 :colorscheme github
 
