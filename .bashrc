@@ -104,9 +104,13 @@ alias epochs='perl -leprint+time'
 [ -x /usr/local/bin/firefox ] && alias firefox='/usr/local/bin/firefox'
 [ -x ~/bin/cal ]              &&  alias cal='~/bin/cal'
 [ -x /nfs/apps/common/ph ]    && alias ph='/nfs/apps/common/ph'
+# erk, on solaris "which" is a csh script :(
+[ -x ~/bin/which ]            && alias which='~/bin/which'
 
 #graphical representation of the current sub-directories
 alias gls=" ls -R | grep \":$\" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
+
+
 
 case $OSTYPE in
     solaris*)
@@ -147,8 +151,6 @@ case $OSTYPE in
         fi
         alias pstree='ptree'
 
-        # erk, on solaris "which" is a csh script 
-        alias which="$HOME/bin/which"
 
         unset arch
         unset ver
@@ -156,7 +158,7 @@ case $OSTYPE in
     linux*)
         alias pstree='pstree -a -c -l -n -h -p'
         alias ls='ls --color -CF'
-        if [ `hostname` == "oak.insubstantial.com.au" ]; then
+        if [ `hostname` == "$home_host" ]; then
             alias gvim='gvim --remote-tab-silent'
         fi
     ;;
