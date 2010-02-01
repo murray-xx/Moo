@@ -1,0 +1,181 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+cal
+
+=head1 SYNOPSIS
+
+cal <month> <year>
+
+=head1 DESCRIPTION
+    
+ This is my cal wrapper script so that I can type more natural language things like
+
+   cal feb          - this February's calendar
+
+   cal 10           - this Octobers calendar
+
+   cal April 2011   - 2011's April calendar
+
+ and it does what you might expect
+
+ Years must be specified with 4 digits.
+
+ Months can be any of digits, full, short or partial as long > 3 characters supplied 
+ (actually I throw away everything after the first 3 chars so aug, augu and Augustine 
+ all print Augusts calendar)
+
+ We helpfully pass all other command line arguments passed over to the cal program, if it 
+ doesn't know what to do with them then it will let you know.
+
+ Yes I considered grabbing a copy of the Perl Power Tools cal and hacking on that and I still
+ might.  This really was a quick and dirty that I got carried away with...
+
+=head1 OPTIONS
+
+ --help
+    Print this message.
+ --man
+    Print the man page.
+ --version|-V
+    Print the program version number.
+
+=head1 BUGS
+
+ Probably many..
+
+=head1 AUTHOR
+
+Murray Barton
+email: murray.barton at gmail.com
+http://incommunique.blogspot.com
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003. Murray Barton. All rights reserved.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=head1 DISCLAIMER
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
+$VERSION = "0.2";
+
+use strict;
+use warnings;
+use POSIX qw(strftime);
+use Data::Dumper;
+use Getopt::Long qw(:config posix_default pass_through );
+use Pod::Usage;
+use File::Basename;
+
+GetOptions(
+    'usage'      => sub { pod2usage(-verbose => 0, -exitval => 0) }, 
+    'help|?'     => sub { pod2usage(-verbose => 1, -exitval => 0) }, 
+    'man'        => sub { pod2usage(-verbose => 2, -exitval => 0) }, 
+    'version|V'  => sub { print basename($0), " v$main::VERSION\n";  exit 0}, 
+);
+
+my %months = qw(01 jan 02 feb 03 mar 04 apr 05 may 06 jun 07 jul
+                08 aug 09 sep 10 oct 11 nov 12 dec);
+
+my %short_months = map { $months{$_}, $_ } keys %months;
+
+my $now_mon  = strftime('%m', localtime(time));
+my $now_year = strftime('%Y', localtime(time));
+my $cal = '/usr/bin/cal';
+
+my ($mon, $year, $options) = (undef,undef,"");
+
+my @delete;
+for ( my $i = 0; $i <= $#ARGV; $i++ ){
+    if ( $ARGV[$i] =~ /^-/ ){
+        $options = join " ", $options, $ARGV[$i]; 
+        push @delete, $i;
+        next; 
+    };
+}
+my $count = 0;
+for ( @delete ){
+    my $delete = $_ - $count;
+    splice @ARGV, $delete, 1;
+    ++$count;
+}
+
+#print "[$options]\n@ARGV\n";
+#exit;
+
+if ( $#ARGV < 0 ){
+    # if we have 0 arguments use this month and this year
+    $mon  = $now_mon;
+    $year = $now_year;
+}
+elsif ( $#ARGV == 0 ){
+    # if we have 1 argument and it's 4 digits, assume year, month doesn't get set to undef
+    # if we have 1 argument and it's 2 digits, assume month, year gets set to this year
+    if ( $ARGV[0] =~ m/^\d{4}$/ ){
+        $year = $ARGV[0];
+    }
+    else {
+        if ( $mon = check_month($ARGV[0]) ){
+            $year = $now_year;
+        }
+        else {
+            die "Invalid or unknown date \"$ARGV[0]\"\n";
+        }
+    }
+    
+}
+elsif ( $#ARGV == 1 ){
+    # if we have 2 arguments, assume month, year or year month
+    for ( @ARGV ){
+        if ( $_ =~ m/^\d{4}$/ ){
+            $year = $_;
+            next;
+        }
+        if ( my $temp = check_month($_) ){
+            $mon = $temp;
+        }
+    }
+
+    if ( ! defined $mon or ! defined $year ){
+        # we got something dodgy, erch
+        die "Unknon date format: \"", join(" ", @ARGV), "\"\n";
+    }
+}
+else {
+    die "Too many args specified\n";
+}
+
+if ( ! defined $mon ){
+    #print "year: [$year]\n";
+    system("$cal $options $year");
+}
+else {
+    #print "month:[$mon] year:[$year]\n";
+    system("$cal $options $mon $year");
+}
+
+exit;
+
+sub check_month {
+    my $temp = shift or die "Month parameter not passed\n";
+    $temp = lc $temp;
+    if ( $temp =~ /^\d{1,2}$/ ){
+        $temp = sprintf "%02d", $temp;
+        return defined $months{$temp} ? $temp : undef;
+    }
+    else {
+        $temp = substr $temp, 0, 3;
+        return defined $short_months{$temp} ? $short_months{$temp} : undef;
+    }
+}
