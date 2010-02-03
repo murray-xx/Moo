@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+#
+# Possible options:
+#   omit header line
+#   omit self from listing
+#   no metacharacters
+#
+# Borrowed from Mark Jason Dominus see http://perl.plover.com/classes/mybin/
+#
+# I've hacked a little, mistakes are probably mine & not his :-)
+#
+
+use strict;
+use warnings;
+use File::Basename;
+
+my $pat = shift or die "Usage: ". basename($0) . " pattern\n";
+
+open my $ps_p, "-|", "ps -ef" or die "Couldn't run ps: $!";
+
+print scalar <$ps_p>;   # header
+while (<$ps_p>) {
+    next if /$0/;       # omit self
+    print if /$pat/o;
+}
+
+close $ps_p;
