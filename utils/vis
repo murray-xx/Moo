@@ -1,0 +1,194 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+ vis
+
+=head1 SYNOPSIS
+
+ vis [-d|--delay <seconds>] <command> [<command arguments>]
+
+=head1 DESCRIPTION
+
+ Run a command every <seconds> seconds, with a screen clear in between iterations.
+
+ So instead of typing some shell variant of
+    while true ; do
+        <command>
+        sleep 20
+    done
+
+ You can just do
+    vis -d 20 <command>
+ or if you are happy with the default 15s delay
+    vis <command>
+
+ This is a perl port of a sparc binary I inheritted.  I rewrote in perl because
+ I didn't have the source code and wanted something I could stick in $HOME/bin
+ and it would just work no matter where I was.
+
+ I've since added the -c|--count feature.
+
+ Why is it called "vis"- I dunno, the original sparc binary that I inheritted 
+ was called vis and I continued the name to this script.  So it's called "vis"
+ because it was called "vis".
+
+=head1 OPTIONS
+
+ -d|--delay <seconds>
+    time delay between iterations of running <command>
+    If delay is not specified we default to 15seconds
+ -c|--count <count>
+    only run command <count> times
+ -f|--force
+    force execution to continue even if the command fails. By default, vis
+    will stop as soon as the command returns a non-zero return code.
+ --help
+    Print this message.
+ --man
+    Print the man page.
+ --version|-V
+    Print the program version number.
+
+=head1 BUGS
+
+None that are known.
+
+=head1 To Do
+
+ Nothing planned at the moment.
+
+=head1 AUTHOR
+
+ Murray Barton
+ email: murray.barton at gmail.com
+ http://incommunique.blogspot.com
+
+=head1 Credits
+
+ Thanks to Glenn, Mr Pointy Head extraordinaire who first introduced me to vis and whose
+ Unix wizardry continues to inspire me.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003. Murray Barton. All rights reserved.
+
+ This program is free software; you can redistribute it and/or
+ modify it under the same terms as Perl itself.
+
+ See http://www.perl.com/perl/misc/Artistic.html
+
+=head1 DISCLAIMER
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
+
+$VERSION = "0.1";
+
+use strict;
+use warnings;
+use Getopt::Long qw(:config pass_through);
+use Pod::Usage;
+use File::Basename;
+
+my $delay = 15;
+my $force = 0;
+my $count;
+
+GetOptions(
+    'd|delay=i' => \$delay,
+    'c|count=i' => \$count,
+    'f|force'   => \$force,
+    'usage'     => sub { pod2usage(-verbose => 0, -exitval => 0) },
+    'help|?'    => sub { pod2usage(-verbose => 1, -exitval => 0) },
+    'man'       => sub { pod2usage(-verbose => 2, -exitval => 0) },
+    'version|V' => sub { print basename($0), " v$main::VERSION\n";  exit 0},
+);
+
+my $command = join " ", @ARGV;
+
+my $iterations  = 1;
+my $clear=`clear`;
+
+while (1){
+
+    if ( defined $count and $iterations > $count ){
+        exit;
+    }
+
+    # clear screen
+    print $clear;
+
+    my $header = mk_header($delay, $iterations, $command);
+    print $header;
+
+    my @cmd_out = `$command 2>&1`;
+    # $command's error status is in $?
+    my $error_status = $? / 256;
+
+    if ( $error_status and ! $force ){
+        die "$command exited with $error_status: @cmd_out";
+    }
+
+    print @cmd_out;
+
+    sleep $delay;
+    ++$iterations;
+}
+
+exit;
+
+sub mk_header {
+    my ( $delay, $iterations, $command ) = @_;
+
+    my $cols = (get_terminal_size())[-1];
+
+    #print "######cols:[$cols]delay:[$delay]command:[$command]\n";
+
+
+    my $cmd_header = "Command: $command";
+    my $cmd_l = length($cmd_header);
+    my $dly_header = "Delay: $delay";
+    my $dly_l = length($dly_header);
+    my $cnt_header = sprintf "Count: %-3.3s", $iterations;
+    my $cnt_l = length($cnt_header);
+
+    my $spaces1;
+    my $spaces2;
+    if ( $cmd_l > ( ($cols / 2 ) - ($dly_l/2) ) ){
+        if ( $cmd_l > ( $cols - $dly_l - $cnt_l ) ){
+            # it's never going to fit the screen
+            my $header = "Command: $command\n\tDelay: $delay\tCount: $iterations\n";
+            return $header;
+        }
+        # just divide the space evenly, not as pretty as having the Delay in the middle
+        # but functional
+        my $space_l = $cols - $cmd_l - $dly_l - $cnt_l;
+        $spaces1 = $spaces2 = " " x ($space_l/2);
+    }
+    else {
+        # cmd_header + some spaces + 1/2 dly_header = 50% of screen
+        # 1/2 delay header + some spaces + cnt_header = 50% of screen
+        $spaces1 = " " x (($cols / 2 ) - ($dly_l/2) - $cmd_l) || " ";
+        $spaces2 = " " x (($cols / 2 ) - ($dly_l/2) - $cnt_l);
+    }
+    my $header = join "", $cmd_header, $spaces1, $dly_header, $spaces2, $cnt_header, "\n";
+    return $header;
+}
+
+sub get_terminal_size {
+    my ($rows, $cols) = (24, 80);
+    my $data = `/bin/stty -a`;
+    if ($data =~ /rows (\d+)\; columns (\d+)/) {
+        ($rows, $cols) = ($1, $2);
+    }
+    else {
+        warn "Could not get terminal size, defaulting to 24x80\n";
+    }
+    return ($rows, $cols);
+}
+
