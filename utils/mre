@@ -3,25 +3,31 @@
 
 =head1 NAME
 
-mre
+ mre
 
 =head1 SYNOPSIS
 
-mre [-x] /path/to/dir
+ mre [-x] /path/to/dir
 
 =head1 DESCRIPTION
-    
-list the Most REcent file(s) in a directory
 
-with no other arguments lists the most recent file in the pwd
+ List the Most REcent file(s) in a directory
 
-with a dir as an argument lists the most recent file in dir
+ With no other arguments lists the most recent file in the pwd
 
-This utility was born out of desperation from doing ls's in directories with tens of thousands
-of files.  The ls would take way too long to process.  mre is quick.
+ With a dir as an argument lists the most recent file in dir
 
-Favourite useage 
+ This utility was born out of desperation from doing ls's in directories with tens of thousands
+ of files.  The ls would take way too long to process.  mre is quick.
+
+ Favourite useage
     tail `mre /path/to/dir`
+
+ We try and do the expected thing so if you hand us a list of files we'll tell you which is
+ the most recent.  If you hand us a shell glob (remember to quote it on the command line)
+ then we'll glob it.
+
+ We don't recurse subdirectories.
 
 =head1 OPTIONS
 
@@ -34,24 +40,35 @@ Favourite useage
  --version|-V
     Print the program version number.
 
+=head1 To Do
+
+ Things that I could implement if needed-
+    Add recurse subdirectories/no recurse subdirectories
+        - File::Find is the best option here.  But mre was written to be quick
+          in big subdirectories not a general purpose find, not sure if this is
+          a good idea or not; and I don't have a huge directory to test on at the
+          moment.
+    Add a --noglob option to turn off globbing?
+    Add an option to include/not include symlinks?
+
 =head1 BUGS
 
 None that I know of :-)
 
 =head1 AUTHOR
 
-Murray Barton
-email: murray.barton at gmail.com
-http://incommunique.blogspot.com
+ Murray Barton
+ email: murray.barton at gmail.com
+ http://incommunique.blogspot.com
 
 =head1 COPYRIGHT
 
-Copyright (c) 2003. Murray Barton. All rights reserved.
+ Copyright (c) 2003. Murray Barton. All rights reserved.
 
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
+ This program is free software; you can redistribute it and/or
+ modify it under the same terms as Perl itself.
 
-See http://www.perl.com/perl/misc/Artistic.html
+ See http://www.perl.com/perl/misc/Artistic.html
 
 =head1 DISCLAIMER
 
@@ -61,8 +78,7 @@ See http://www.perl.com/perl/misc/Artistic.html
 
 =cut
 
-
-$VERSION = "0.2";
+$VERSION = "0.3";
 
 use strict;
 use warnings;
@@ -79,7 +95,6 @@ GetOptions(
     'version|V'  => sub { print basename($0), " v$main::VERSION\n";  exit 0}, 
 );
 
-
 my $list_mode = 0;
 
 if ( defined $ARGV[0] and $ARGV[0] =~ m|^-{1,2}(\d+)$| ){
@@ -87,44 +102,75 @@ if ( defined $ARGV[0] and $ARGV[0] =~ m|^-{1,2}(\d+)$| ){
     $list_mode = $1;
     shift @ARGV;
 }
-my $dir = $ARGV[0] || ".";
+# any other command line arguments given will be treated as file/directory names
 
 my $latest;
 my %files;
+
+my @list;
+if ( $#ARGV < 0 ){
+    # no command line arguments
+    push @list, ".";
+}
+else {
+    @list = @ARGV;
+}
+
 $latest->{tstamp}   = 0;
-$latest->{filename} = "No files found in $dir";
+$latest->{filename} = "No files found";
 
-opendir(my $dh , $dir) || die "Could not opendir $dir: $!";
 
-# cd to $dir because readdir just gives filenames and without the chdir
-# we would have to prepend $dir to $_ to do stuff to them  (-f and stat)
-chdir($dir);
-
-for ( readdir $dh ){
-    lstat $_;
-    next unless -f _;
-    next if -l _;
-    my $tstamp = (stat)[9] || 0;
-    if ( $list_mode > 0 ){
-        $files{$_} = $tstamp;
+for my $thing ( @list ){
+    if ( -d $thing ){
+        # it's a directory, slurp it
+        ( my $dir = $thing ) =~ s|/$||;    # remove trailing slashes
+        opendir(my $dh , $dir) || die "Could not opendir $dir: $!";
+        for my $file ( map { "$dir/$_" } readdir $dh ){
+            process_file($file);
+        }
+        closedir $dh;
     }
-    elsif ($tstamp > $latest->{tstamp}){
-        $latest->{filename} = $_;
-        $latest->{tstamp}   = $tstamp;
+    else {
+        if ( $thing =~ /\?|\*/ ){
+            # it's a shell glob, glob it
+            while ( my $file = glob("$thing") ){
+                process_file($file);
+            }
+        }
+        else {
+            process_file($thing);
+        }
     }
 }
-closedir $dh;
 
 if ( $list_mode > 0 ){
-    my $cnt = 1;
-    for ( reverse sort { $files{$a} <=> $files{$b} } keys %files ){
-        print "$_\n";
-        last if $cnt >= $list_mode;
+    my $cnt = 0;
+    my $start = ( 1 + scalar keys %files ) - $list_mode;
+
+    for ( sort { $files{$a} <=> $files{$b} } keys %files ){
         ++$cnt;
+        next unless $cnt >= $start;
+        print "$_\n";
     }
 }
 else {
     print $latest->{filename}, "\n";
 }
 
+sub process_file {
+    my $file = shift or die "Filename parameter not passed\n";
+    for ( $file ){
+        lstat $_;
+        next unless -f _;
+        next if -l _;
+        my $tstamp = (stat)[9] || 0;
+        if ( $list_mode > 0 ){
+            $files{$_} = $tstamp;
+        }
+        elsif ($tstamp > $latest->{tstamp}){
+            $latest->{filename} = $_;
+            $latest->{tstamp}   = $tstamp;
+        }
+    }
+}
 
