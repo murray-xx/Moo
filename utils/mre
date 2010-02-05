@@ -17,15 +17,17 @@
 
  With a dir as an argument lists the most recent file in dir
 
- This utility was born out of desperation from doing ls's in directories with tens of thousands
- of files.  The ls would take way too long to process.  mre is quick.
+ This utility was born out of desperation from doing ls with -rt options 
+ in directories with hundreds of thousands of files in order to find which
+ one had been most recently edited.  ls takes way too long to process big 
+ directories.  mre is quick.
 
  Favourite useage
     tail `mre /path/to/dir`
 
- We try and do the expected thing so if you hand us a list of files we'll tell you which is
- the most recent.  If you hand us a shell glob (remember to quote it on the command line)
- then we'll glob it.
+ We try and do the expected thing so if you hand us a list of files we'll 
+ tell you which is the most recent.  If you hand us a shell glob (remember 
+ to quote it on the command line) then we'll glob it.
 
  We don't recurse subdirectories.
 
@@ -44,10 +46,10 @@
 
  Things that I could implement if needed-
     Add recurse subdirectories/no recurse subdirectories
-        - File::Find is the best option here.  But mre was written to be quick
-          in big subdirectories not a general purpose find, not sure if this is
-          a good idea or not; and I don't have a huge directory to test on at the
-          moment.
+      - File::Find is the best option here.  But mre was written to be quick
+        in big subdirectories not a general purpose find, not sure if this is
+        a good idea or not; and I don't have a huge directory to test on at the
+         moment.
     Add a --noglob option to turn off globbing?
     Add an option to include/not include symlinks?
 
@@ -133,9 +135,16 @@ for my $thing ( @list ){
     else {
         if ( $thing =~ /\?|\*/ ){
             # it's a shell glob, glob it
-            while ( my $file = glob("$thing") ){
+            # we could use perls glob() but I tested on a directory
+            # with 200002 files and this seemed quicker
+            my $dir = dirname($thing);
+            my $pat = glob2pat(basename($thing));
+            opendir(my $dh , $dir) || die "Could not opendir $dir: $!";
+            for my $file ( readdir $dh ){
+                next unless $file =~ /$pat/;
                 process_file($file);
             }
+            closedir $dh;
         }
         else {
             process_file($thing);
@@ -172,5 +181,21 @@ sub process_file {
             $latest->{tstamp}   = $tstamp;
         }
     }
+}
+
+sub glob2pat {
+
+# Thanks for Recipe 6.9. Matching Shell Globs as Regular Expressions
+# of the Perl Cookbook
+
+    my $globstr = shift;
+    my %patmap = (
+        '*' => '.*',
+        '?' => '.',
+        '[' => '[',
+        ']' => ']',
+    );
+    $globstr =~ s{(.)} { $patmap{$1} || "\Q$1" }ge;
+    return $globstr;
 }
 
