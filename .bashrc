@@ -101,16 +101,26 @@ alias path='echo $PATH'
 alias root='sudo $BASH'
 alias isodate='date +"%Y%m%d"'
 alias epochs='perl -leprint+time'
-[ -x /usr/local/bin/firefox ] && alias firefox='/usr/local/bin/firefox'
-[ -x ~/bin/cal ]              &&  alias cal='~/bin/cal'
-[ -x /nfs/apps/common/ph ]    && alias ph='/nfs/apps/common/ph'
-# erk, on solaris "which" is a csh script :(
-[ -x ~/bin/which ]            && alias which='~/bin/which'
 
-#graphical representation of the current sub-directories
-alias gls=" ls -R | grep \":$\" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
-
-
+while read ralias rcmd ; do
+    case $ralias in
+        \#*) continue ;;
+        "") continue ;;
+        *)
+            # if the binary exists then create the alias
+            [ -x $rcmd ] && alias $ralias=$rcmd
+        ;;
+    esac
+done <<__end_of_commands
+#
+# for stuff I am not sure I can rely on to be present
+#
+firefox    /usr/local/bin/firefox
+cal        ~/bin/cal
+ph         /nfs/apps/common/ph
+## erk, on solaris "which" is a csh script :(
+which      ~/bin/which
+__end_of_commands
 
 case $OSTYPE in
     solaris*)
@@ -119,37 +129,34 @@ case $OSTYPE in
         solaris2_ls="/appl/Solaris2/bin/ls"
         if [ -f $solaris2_ls -a -x $solaris2_ls -a "$arch" = "sparc" ]; then
             alias ls="$solaris2_ls --color -CF"
-        else 
+        else
             alias ls='ls -CF'
         fi
         unset solaris2_ls
 
-        if [ "$ver" = "5.9" -o "$ver" = "5.8" ]; then
-            solaris2_df="/appl/Solaris2/bin/df"
-            if [ -f $solaris2_df -a -x $solaris2_df ]; then
-                alias df="$solaris2_df"
-            fi
-            unset solaris2_df
-        fi
+        alias pstree='ptree'
 
-        sccs="/usr/ccs/bin"
-        if [ -x $sccs ]; then
-            alias sccs="$sccs"
-        fi
-        unset sccs
-
-        # the built in enable command conflicts with solaris's print enable
-        # se we disable it...
+        # the bash built in enable command conflicts with solaris's 
+        # print enable so we disable it...
         if [ "`type -t enable`" == "builtin" ]; then
             enable -n enable
         fi
-        if [ "$ver" == "5.10" ]; then
-            if [ `zoneadm list | wc -l` -gt 1 ]; then
-                # we have child zones!
-                alias ps='/usr/bin/ps -o zone,user,pid,ppid,c,stime,tty,time,args'
-            fi
-        fi
-        alias pstree='ptree'
+
+        case $ver in
+            5.8|5.9)
+                solaris2_df="/appl/Solaris2/bin/df"
+                if [ -f $solaris2_df -a -x $solaris2_df ]; then
+                    alias df="$solaris2_df"
+                fi
+                unset solaris2_df
+            ;;
+            5.10)
+                if [ `zoneadm list | wc -l` -gt 1 ]; then
+                    # we have child zones!
+                    alias ps='/usr/bin/ps -o zone,user,pid,ppid,c,stime,tty,time,args'
+                fi
+            ;;
+        esac
 
 
         unset arch
@@ -161,8 +168,6 @@ case $OSTYPE in
         if [ `hostname` == "$home_host" ]; then
             alias gvim='gvim --remote-tab-silent'
         fi
-    ;;
-    *)
     ;;
 esac
 
@@ -183,17 +188,17 @@ pcolour () {
 }
 
 ttitle () {
-
+# set the terminal title to something, defaults to hostname
     case $OSTYPE in
         linux*) echo_args="-ne" ;;
     esac
-    
+
     if [ -z "$1" ]; then
         title=`hostname`
     else
         title=$1
     fi
-    
+
     /bin/echo $echo_args "\033]0;$title\007"
 }
 
@@ -206,7 +211,7 @@ cnf () {
 }
 
 epoch2date () {
-    # convert epochs to human readable :)
+# convert epochs to human readable :)
     perl -MPOSIX -le 'print strftime("%a %F %R:%S", localtime '$1')'
 }
 
@@ -216,8 +221,8 @@ drwho () {
               print $gecos, " " x (21 - length($gecos)), $_;'
 }
 
-# I always forget this... 
 perlmods () {
+# I always forget this... 
     /usr/bin/find `perl -e 'print "@INC"'` -name '*.pm' -print
 }
 
