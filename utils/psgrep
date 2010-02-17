@@ -1,27 +1,111 @@
 #!/usr/bin/perl
-#
-# Possible options:
-#   omit header line
-#   omit self from listing
-#   no metacharacters
-#
-# Borrowed from Mark Jason Dominus see http://perl.plover.com/classes/mybin/
-#
-# I've hacked a little, mistakes are probably mine & not his :-)
-#
+
+=head1 NAME
+
+ psgrep
+
+=head1 SYNOPSIS
+
+ psgrep [-v] <pattern>
+
+=head1 DESCRIPTION
+
+ Search through ps for <pattern>, a shortcut for ps -ef | grep <pattern>
+
+=head1 OPTIONS
+
+ -v
+    like grep -v, show lines that don't match <pattern>
+ --headers
+    Print ps headers.  Default behaviour.
+ --noheaders
+    Do not print ps headers.
+ --usage
+    Print usage message.
+ --help
+    Print this message.
+ --man
+    Print the man page.
+ --version|-V
+    Print the program version number.
+
+=head1 BUGS
+
+ None that are known.
+
+=head1 To Do
+
+ Possible options:
+   omit self from listing
+   no metacharacters
+
+ At the moment the ps options are hard coded in the script.  This is not ideal.  Not sure
+ of the best way to specify; maybe an environment variable or a command line option and
+ if neither of those are specified then use a default.
+
+=head1 AUTHOR
+
+ Murray Barton
+ email: murray.barton at gmail.com
+ http://incommunique.blogspot.com
+
+=head1 Credits
+
+ Borrowed from Mark Jason Dominus see http://perl.plover.com/classes/mybin/
+
+ I've hacked a bit, mistakes are mine & not his :-)
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003. Murray Barton. All rights reserved.
+
+ This program is free software; you can redistribute it and/or
+ modify it under the same terms as Perl itself.
+
+ See http://www.perl.com/perl/misc/Artistic.html
+
+=head1 DISCLAIMER
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
+
+$VERSION = "0.3";
 
 use strict;
 use warnings;
 use File::Basename;
+use Getopt::Long qw(:config no_ignore_case);
+use Pod::Usage;
+
+my $invert_match = 0;
+my $headers = 1;
+GetOptions(
+    'v'         => \$invert_match,
+    'headers!'  => \$headers,
+    'usage'     => sub { pod2usage(-verbose => 0, -exitval => 0) },
+    'help|?'    => sub { pod2usage(-verbose => 1, -exitval => 0) },
+    'man'       => sub { pod2usage(-verbose => 2, -exitval => 0) },
+    'version|V' => sub { print basename($0), " v$main::VERSION\n";  exit 0},
+) or pod2usage(-verbose => 0, -exitval => 1);
+
 
 my $pat = shift or die "Usage: ". basename($0) . " pattern\n";
 
 open my $ps_p, "-|", "ps -ef" or die "Couldn't run ps: $!";
 
-print scalar <$ps_p>;   # header
+print scalar <$ps_p> if ( $headers );   # header
+
 while (<$ps_p>) {
     next if /$0/;       # omit self
-    print if /$pat/o;
+    if ( $invert_match ){
+        print unless /$pat/o;
+    }
+    else {
+        print if /$pat/o;
+    }
 }
 
 close $ps_p;
