@@ -72,7 +72,7 @@ Copyright (c) 2003. Murray Barton. All rights reserved.
 
 =cut
 
-$VERSION = "0.3";
+$VERSION = "0.3.1";
 
 use strict;
 use warnings;
@@ -92,7 +92,10 @@ GetOptions(
 ) or pod2usage(-verbose => 0, -exitval => 1);
 
 
-my $pat = shift or die "Usage: ". basename($0) . " pattern\n";
+my $pat = shift or pod2usage(
+    -message => "Please specify the pattern",
+    -verbose => 0,
+    -exitval => 1);
 
 open my $ps_p, "-|", "ps -ef" or die "Couldn't run ps: $!";
 
