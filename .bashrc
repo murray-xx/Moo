@@ -1,11 +1,14 @@
 #
 # .bashrc
 #
+# update version always available at
+#   http://github.com/murray/Moo/tree/master/utils/
+#
 # Murray's .bashrc
 # with a tip of the hat to Boyd's favourite .bashrc -
 #    http://www.users.on.net/~boyd.adamson/boyds.bashrc
 #
-# and appologies for stuff that is specific to current $client
+# stuff specific to locations (say current $client) goes in .bashrc.local
 #
 #
 
@@ -80,7 +83,20 @@ shopt -s checkwinsize histreedit
 #Only put duplicate lines in the history once
 HISTCONTROL=ignoredups
 
-HISTFILE=$HOME/.bash_history/${HOSTNAME}
+HISTDIR=$HOME/.bash_history
+HISTFILE=${HISTDIR}/${HOSTNAME}
+if [ ! -d $HISTDIR ]; then
+    if [ -f $HISTDIR ]; then
+        mv $HISTDIR $HISTDIR.tmp
+        mkdir $HISTDIR
+        mv $HISTDIR.tmp $HISTFILE
+    else
+        mkdir $HISTDIR
+    fi
+fi
+
+unset HISTDIR
+
 if [ $EUID -eq 0  -o "$LOGNAME" = "root" ]; then
     export TMOUT=600;
     HISTFILE=${HISTFILE}.root
@@ -91,6 +107,7 @@ if [ $EUID -eq 0  -o "$LOGNAME" = "root" ]; then
 else
     umask 077
 fi
+
 export HISTFILE
 
 # dircolors --print-database
@@ -117,23 +134,13 @@ done <<__end_of_commands
 #
 firefox    /usr/local/bin/firefox
 cal        ~/bin/cal
-ph         /nfs/apps/common/ph
 ## erk, on solaris "which" is a csh script :(
 which      ~/bin/which
 __end_of_commands
 
 case $OSTYPE in
     solaris*)
-        arch=`uname -p`
         ver=`uname -r`
-        solaris2_ls="/appl/Solaris2/bin/ls"
-        if [ -f $solaris2_ls -a -x $solaris2_ls -a "$arch" = "sparc" ]; then
-            alias ls="$solaris2_ls --color -CF"
-        else
-            alias ls='ls -CF'
-        fi
-        unset solaris2_ls
-
         alias pstree='ptree'
 
         # the bash built in enable command conflicts with solaris's 
@@ -143,13 +150,6 @@ case $OSTYPE in
         fi
 
         case $ver in
-            5.8|5.9)
-                solaris2_df="/appl/Solaris2/bin/df"
-                if [ -f $solaris2_df -a -x $solaris2_df ]; then
-                    alias df="$solaris2_df"
-                fi
-                unset solaris2_df
-            ;;
             5.10)
                 if [ `zoneadm list | wc -l` -gt 1 ]; then
                     # we have child zones!
@@ -158,8 +158,6 @@ case $OSTYPE in
             ;;
         esac
 
-
-        unset arch
         unset ver
     ;;
     linux*)
