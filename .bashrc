@@ -124,7 +124,11 @@ while read ralias rcmd ; do
         \#*) continue ;;
         "") continue ;;
         *)
-            # if the binary exists then create the alias
+            # tilde expansion to make -x happy
+            if [ `echo $rcmd | grep -c "^~"` -ge 1 ]; then
+                rcmd=`echo $rcmd | sed -e 's|^~|'$HOME'|'`
+            fi
+            # if it's executable then create the alias
             [ -x $rcmd ] && alias $ralias=$rcmd
         ;;
     esac
