@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# update version always available at
+# most recent version always available at
 #   http://github.com/murray/Moo/tree/master/utils/
 #
 # Murray's .bashrc
@@ -15,44 +15,33 @@
 [[ $- == *i* ]] && _shell_is_interactive=1
 
 [ -f $HOME/.bashrc.local ] && . $HOME/.bashrc.local
-path_edit=~/bin/pe
 
-PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/local/sbin:/usr/sbin
-MANPATH=/usr/local/man:/usr/man:/usr/share/man:/usr/kerberos/man
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+MANPATH=/usr/man:/usr/share/man:/usr/local/man:/usr/kerberos/man
 
-[ -d ~/bin ] && PATH=$PATH:~/bin
+PATH=`~/bin/pe +~/bin || echo $PATH`
 
-[ -d /opt/VRTS/man ] && MANPATH=$MANPATH:/opt/VRTS/man
-
-if [ -d /usr/X11R6 ]; then
-        PATH=$PATH:/usr/X11R6/bin
-        MANPATH=$MANPATH:/usr/X11R6/man
-fi
-
-if [ -d /usr/openwin ]; then
-        PATH=$PATH:/usr/openwin/bin
-        MANPATH=$MANPATH:/usr/openwin/man
-fi
-
-if [ -d /usr/opt/SUNWmd ]; then
-        PATH=$PATH:/usr/opt/SUNWmd/sbin
-        MANPATH=$MANPATH:/usr/opt/SUNWmd/man
-fi
-
-if [ -d /opt/SUNWadm ]; then
-        PATH=$PATH:/opt/SUNWadm/bin
-        MANPATH=$MANPATH:/opt/SUNWadm/man
-fi
-
-if [ -d /opt/OPENssh/ ]; then
-    PATH=`$path_edit +/opt/OPENssh/bin || echo $PATH`
-    MANPATH=$MANPATH:/opt/OPENssh/man
-fi
-
-if [ -d /opt/csw/ ]; then
-    PATH=`$path_edit +/opt/csw/bin || echo $PATH`
-    MANPATH=$MANPATH:/opt/csw/man
-fi
+while read dir bin ; do
+    case $dir in
+        \#*) continue ;;
+        "") continue ;;
+        *)
+            if [ -d $dir ]; then
+                bin="$dir/${bin:=bin}"
+                PATH=`pe +$bin || echo $PATH`
+                MANPATH=$MANPATH:/$dir/man
+            fi
+        ;;
+    esac
+done <<__end_of_dirs
+/usr/X11R6
+/usr/openwin
+/opt/SUNWadm
+/opt/OPENssh
+/opt/csw
+/usr/opt/SUNWmd sbin
+/opt/VRTS
+__end_of_dirs
 
 export PATH MANPATH
 
@@ -65,9 +54,7 @@ export PAGER='less'
 export LESS="-sriXMq -PM ?lLine %lb:--less--.?L/%L.?p (%pB\%).?f in %f.%t"
 export LESSKEY="${HOME}/.less"
 
-if [[ "$_shell_is_interactive" == 1 ]]; then
-    stty erase "^?"
-fi
+[[ "$_shell_is_interactive" == 1 ]] && stty erase "^?"
 
 # Shell options
 shopt -s checkwinsize histreedit
@@ -125,11 +112,10 @@ while read ralias rcmd ; do
         "") continue ;;
         *)
             # tilde expansion to make -x happy
-            if [ `echo $rcmd | grep -c "^~"` -ge 1 ]; then
-                rcmd=`echo $rcmd | sed -e 's|^~|'$HOME'|'`
-            fi
+            rcmd=`eval echo $rcmd`
+
             # if it's executable then create the alias
-            [ -x $rcmd ] && alias $ralias=$rcmd
+            [ -x $rcmd ] && alias $ralias="$rcmd"
         ;;
     esac
 done <<__end_of_commands
