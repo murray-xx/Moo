@@ -219,6 +219,14 @@ hogs () {
     UNIX95= /bin/ps -eo vsz,pid,args | sort -nr | head -10
 }
 
+lstimes () {
+    for file in "$@" ; do
+        echo -n "mtime: `ls -l "$file"`"
+        echo -n "atime: `ls -l --time=atime "$file"`"
+        echo -n "ctime: `ls -l --time=ctime "$file"`"
+    done
+}
+
 unset _shell_is_interactive
 
 
