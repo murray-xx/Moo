@@ -1,8 +1,10 @@
 #
 # .bashrc
 #
-# most recent version always available at
-#   http://github.com/murray/Moo/tree/master/utils/
+# @(#) $Revision: 1.8.3
+#
+# @(#) most recent version always available at
+# @(#)   http://github.com/murray/Moo/tree/master/utils/
 #
 # Murray's .bashrc
 # with a tip of the hat to Boyd's favourite .bashrc -
@@ -70,19 +72,19 @@ shopt -s checkwinsize histreedit
 #Only put duplicate lines in the history once
 HISTCONTROL=ignoredups
 
-HISTDIR=$HOME/.bash_history
-HISTFILE=${HISTDIR}/${HOSTNAME}
-if [ ! -d $HISTDIR ]; then
-    if [ -f $HISTDIR ]; then
-        mv $HISTDIR $HISTDIR.tmp
-        mkdir $HISTDIR
-        mv $HISTDIR.tmp $HISTFILE
+_HISTDIR=$HOME/.bash_history
+HISTFILE=${_HISTDIR}/${HOSTNAME}
+if [ ! -d $_HISTDIR ]; then
+    if [ -f $_HISTDIR ]; then
+        mv $_HISTDIR $_HISTDIR.tmp
+        mkdir $_HISTDIR
+        mv $_HISTDIR.tmp $HISTFILE
     else
-        mkdir $HISTDIR
+        mkdir $_HISTDIR
     fi
 fi
 
-unset HISTDIR
+unset _HISTDIR
 
 if [ $EUID -eq 0  -o "$LOGNAME" = "root" ]; then
     export TMOUT=600;
@@ -102,7 +104,7 @@ export LS_COLORS='no=00:fi=00:di=01;34:ln=00;36:pi=40;33:so=01;35:do=01;35:bd=40
 
 alias more='less'
 alias path='echo $PATH'
-alias root='sudo $BASH'
+alias root='sudo bash'
 alias isodate='date +"%Y%m%d"'
 alias epochs='perl -leprint+time'
 
@@ -128,9 +130,14 @@ cal        ~/bin/cal
 which      ~/bin/which
 __end_of_commands
 
+if [ -x ~/bin/perldoc-complete ]; then
+    alias pod=perldoc
+    complete -C perldoc-complete -o nospace -o default pod
+fi
+
 case $OSTYPE in
     solaris*)
-        ver=`uname -r`
+        _ver=`uname -r`
         alias pstree='ptree'
 
         # the bash built in enable command conflicts with solaris's 
@@ -139,7 +146,7 @@ case $OSTYPE in
             enable -n enable
         fi
 
-        case $ver in
+        case $_ver in
             5.10)
                 if [ `zoneadm list | wc -l` -gt 1 ]; then
                     # we have child zones!
@@ -148,7 +155,7 @@ case $OSTYPE in
             ;;
         esac
 
-        unset ver
+        unset _ver
     ;;
     linux*)
         alias pstree='pstree -a -c -l -n -h -p'
@@ -161,18 +168,20 @@ esac
 
 pcolour () {
     case $1 in
-        "")      code=30;;
-        black)   code=30;;
-        red)     code=31;;
-        green)   code=32;;
-        yellow)  code=34;;
-        blue)    code=34;;
-        magenta) code=35;;
-        cyan)    code=36;;
-        white)   code=37;;
+        "")          code="01;30";;
+        black)       code="01;30";;
+        red)         code="01;31";;
+        green)       code="01;32";;
+        yellow)      code="01;34";;
+        blue)        code="01;34";;
+        bld_blue)    code="02;34";;
+        magenta)     code="01;35";;
+        bld_magenta) code="01;35";;
+        cyan)        code="01;36";;
+        white)       code="01;37";;
         *) echo "unknown colour \"$1\"!"; return;;
     esac
-    export PS1="\[\033[0;${code}m\][\h \w]\$ \[\033[0m\]"
+    export PS1="\[\033[${code}m\][\h \w]\$ \[\033[0m\]"
 }
 
 ttitle () {
@@ -224,6 +233,12 @@ lstimes () {
         echo -n "mtime: `ls -l "$file"`"
         echo -n "atime: `ls -l --time=atime "$file"`"
         echo -n "ctime: `ls -l --time=ctime "$file"`"
+    done
+}
+
+own () {
+    for file in "$@" ; do
+        sudo chown `id -u`:`id -g` "$file"
     done
 }
 
