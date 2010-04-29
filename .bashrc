@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.8.3
+# @(#) $Revision: 1.8.5
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -21,7 +21,7 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 MANPATH=/usr/man:/usr/share/man:/usr/local/man:/usr/kerberos/man
 
-PATH=`~/bin/pe +~/bin || echo $PATH`
+PATH=`~/bin/pe ++~/bin || echo $PATH`
 
 while read dir bin ; do
     case $dir in
@@ -107,6 +107,7 @@ alias path='echo $PATH'
 alias root='sudo bash'
 alias isodate='date +"%Y%m%d"'
 alias epochs='perl -leprint+time'
+alias src='. ~/.bashrc'
 
 while read ralias rcmd ; do
     case $ralias in
@@ -125,9 +126,6 @@ done <<__end_of_commands
 # for stuff I am not sure I can rely on to be present
 #
 firefox    /usr/local/bin/firefox
-cal        ~/bin/cal
-## erk, on solaris "which" is a csh script :(
-which      ~/bin/which
 __end_of_commands
 
 if [ -x ~/bin/perldoc-complete ]; then
@@ -145,6 +143,11 @@ case $OSTYPE in
         if [ "`type -t enable`" == "builtin" ]; then
             enable -n enable
         fi
+
+        llpstat () {
+            lpstat -p $1 -o $1
+        }
+
 
         case $_ver in
             5.10)
@@ -197,10 +200,6 @@ ttitle () {
     fi
 
     /bin/echo $echo_args "\033]0;$title\007"
-}
-
-llpstat () {
-    lpstat -p $1 -o $1
 }
 
 cnf () {
