@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.8.5
+# @(#) $Revision: 1.8.6
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -15,6 +15,8 @@
 #
 
 [[ $- == *i* ]] && _shell_is_interactive=1
+
+unalias -a      # my environment, my way :)
 
 [ -f $HOME/.bashrc.local ] && . $HOME/.bashrc.local
 
@@ -30,8 +32,13 @@ while read dir bin ; do
         *)
             if [ -d $dir ]; then
                 bin="$dir/${bin:=bin}"
-                PATH=`pe +$bin || echo $PATH`
-                MANPATH=$MANPATH:/$dir/man
+                if [ -d $bin ]; then
+                    PATH=`pe +$bin || echo $PATH`
+                fi
+                man="$dir/man";
+                if [ -d $man ]; then
+                    MANPATH=$MANPATH:$man
+                fi
             fi
         ;;
     esac
@@ -102,31 +109,36 @@ export HISTFILE
 # dircolors --print-database
 export LS_COLORS='no=00:fi=00:di=01;34:ln=00;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=02;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:';
 
-alias more='less'
 alias path='echo $PATH'
 alias root='sudo bash'
 alias isodate='date +"%Y%m%d"'
 alias epochs='perl -leprint+time'
 alias src='. ~/.bashrc'
 
-while read ralias rcmd ; do
-    case $ralias in
+while read _ralias _rcmd ; do
+    case $_ralias in
         \#*) continue ;;
         "") continue ;;
         *)
             # tilde expansion to make -x happy
-            rcmd=`eval echo $rcmd`
+            _rcmd=`eval echo $_rcmd`
+
+            _rcmd=`which $_rcmd`
 
             # if it's executable then create the alias
-            [ -x $rcmd ] && alias $ralias="$rcmd"
+            [ -n "$_rcmd" ] && [ -x $_rcmd ] && alias $_ralias="$_rcmd"
         ;;
     esac
 done <<__end_of_commands
 #
 # for stuff I am not sure I can rely on to be present
 #
-firefox    /usr/local/bin/firefox
+firefox     /usr/local/bin/firefox
+# hard to believe but yes less is not available everywhere :(
+more        less
 __end_of_commands
+
+unset _rcmd _ralias
 
 if [ -x ~/bin/perldoc-complete ]; then
     alias pod=perldoc
@@ -151,10 +163,14 @@ case $OSTYPE in
 
         case $_ver in
             5.10)
-                if [ `zoneadm list | wc -l` -gt 1 ]; then
-                    # we have child zones!
-                    alias ps='/usr/bin/ps -o zone,user,pid,ppid,c,stime,tty,time,args'
+                _ZONEADM=`which zoneadm`
+                if [ -n "$_ZONEADM" ] && [ -x $_ZONEADM ] ; then
+                    if [ `$_ZONEADM list | wc -l` -gt 1 ]; then
+                        # we have child zones!
+                        alias ps='/usr/bin/ps -o zone,user,pid,ppid,c,stime,tty,time,args'
+                    fi
                 fi
+                unset _ZONEADM
             ;;
         esac
 
@@ -218,7 +234,7 @@ drwho () {
 }
 
 perlmods () {
-# I always forget this... 
+# I always forget this... :)
     /usr/bin/find `perl -e 'print "@INC"'` -name '*.pm' -print
 }
 
