@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.8.6
+# @(#) $Revision: 1.8.7
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -123,7 +123,10 @@ while read _ralias _rcmd ; do
             # tilde expansion to make -x happy
             _rcmd=`eval echo $_rcmd`
 
-            _rcmd=`which $_rcmd`
+            if [ `echo $_rcmd | grep -c "^/"` -le 0 ]; then
+                # if it's not an absolute path then make it so...
+                _rcmd=`which $_rcmd`
+            fi
 
             # if it's executable then create the alias
             [ -n "$_rcmd" ] && [ -x $_rcmd ] && alias $_ralias="$_rcmd"
@@ -134,7 +137,7 @@ done <<__end_of_commands
 # for stuff I am not sure I can rely on to be present
 #
 firefox     /usr/local/bin/firefox
-# hard to believe but yes less is not available everywhere :(
+# hard to believe but yes, less is not available everywhere :(
 more        less
 __end_of_commands
 
