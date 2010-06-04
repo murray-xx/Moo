@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.8.7
+# @(#) $Revision: 1.8.8
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -186,6 +186,11 @@ case $OSTYPE in
             alias gvim='gvim --remote-tab-silent'
         fi
     ;;
+    hpux*)
+        alias bdf="~/bin/bdf.pl"
+        export TERM=xterm
+    ;;
+
 esac
 
 pcolour () {
@@ -230,8 +235,9 @@ epoch2date () {
     perl -MPOSIX -le 'print strftime("%a %F %R:%S", localtime '$1')'
 }
 
-drwho () {
-  who | \
+who () {
+# we like to know who we are really dealing with...
+  /usr/bin/who | \
     perl -ne '$gecos = (getpwnam((split)[0]))[6];
               print $gecos, " " x (21 - length($gecos)), $_;'
 }
@@ -243,10 +249,13 @@ perlmods () {
 
 hogs () {
     echo " VSZ   PID COMMAND"
-    UNIX95= /bin/ps -eo vsz,pid,args | sort -nr | head -10
+    # need UNIX95 option for HPUX and possibly older Solaris
+    # lets party like it's 2010 and display vsz in Mb...
+    UNIX95= /bin/ps -eo vsz,pid,args | awk '{$1=sprintf("%0.2fM", $1/1024); print}' | sort -rn | head -10
 }
 
 lstimes () {
+# stat will show all of these if you are on an OS with stat...
     for file in "$@" ; do
         echo -n "mtime: `ls -l "$file"`"
         echo -n "atime: `ls -l --time=atime "$file"`"
