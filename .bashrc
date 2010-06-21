@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.8.8
+# @(#) $Revision: 1.9.0
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -243,8 +243,14 @@ who () {
 }
 
 perlmods () {
-# I always forget this... :)
-    /usr/bin/find `perl -e 'print "@INC"'` -name '*.pm' -print
+    /usr/bin/find `perl -e 'print "@INC"'` -name '*.pm' -print | grep -v "^./"
+}
+
+perlmodver () {
+# print the version of a module
+# eg perlmodver Net::LDAP
+# some modules may not set $VERSION :-l
+    perl -M$1 -le 'print "'$1' : ", $'$1'::VERSION';
 }
 
 hogs () {
@@ -252,6 +258,12 @@ hogs () {
     # need UNIX95 option for HPUX and possibly older Solaris
     # lets party like it's 2010 and display vsz in Mb...
     UNIX95= /bin/ps -eo vsz,pid,args | awk '{$1=sprintf("%0.2fM", $1/1024); print}' | sort -rn | head -10
+}
+
+perms2 () {
+# perms2 == permissions to...
+# could have called it "permsonpath" but perms2 is shorter :)
+    perl -e '$ARGV[0]=`pwd` if ( ! $ARGV[0] or $ARGV[0] eq "."); map {if($_){$f=join "/",$f,$_;system("ls -ald $f")}} split m|/|,shift' $1
 }
 
 lstimes () {
