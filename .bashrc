@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.9.0
+# @(#) $Revision: 1.9.1
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -58,10 +58,20 @@ export TITLEBAR='\[\033]0;\h\007\]'
 export PS1="${TITLEBAR}[\h \w]\$ "
 export TERM=vt220  # we like vt220 because less keys work under it...
 export EDITOR=vi
-export PAGER='less'
-#LESS="-sriX -k$HOME/.less"
-export LESS="-sriXMq -PM ?lLine %lb:--less--.?L/%L.?p (%pB\%).?f in %f.%t"
-export LESSKEY="${HOME}/.less"
+
+_LESS=`which less`;
+if [ -n "$_LESS" ] && [ -x $_LESS ] ; then
+    export PAGER='$_LESS'
+    #LESS="-sriX -k$HOME/.less"
+    export LESS="-sriXMq -PM ?lLine %lb:--less--.?L/%L.?p (%pB\%).?f in %f.%t"
+    export LESSKEY="${HOME}/.less"
+    alias more="$_LESS"
+else
+    # oh no's...
+    export PAGER='more'
+    alias less='more'
+fi
+unset _LESS
 
 [[ "$_shell_is_interactive" == 1 ]] && stty erase "^?"
 
@@ -137,8 +147,6 @@ done <<__end_of_commands
 # for stuff I am not sure I can rely on to be present
 #
 firefox     /usr/local/bin/firefox
-# hard to believe but yes, less is not available everywhere :(
-more        less
 __end_of_commands
 
 unset _rcmd _ralias
