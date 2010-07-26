@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.9.1
+# @(#) $Revision: 1.9.2
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -61,7 +61,7 @@ export EDITOR=vi
 
 _LESS=`which less`;
 if [ -n "$_LESS" ] && [ -x $_LESS ] ; then
-    export PAGER='$_LESS'
+    export PAGER="$_LESS"
     #LESS="-sriX -k$HOME/.less"
     export LESS="-sriXMq -PM ?lLine %lb:--less--.?L/%L.?p (%pB\%).?f in %f.%t"
     export LESSKEY="${HOME}/.less"
