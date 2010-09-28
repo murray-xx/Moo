@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.9.2
+# @(#) $Revision: 1.9.3
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -287,6 +287,14 @@ own () {
     for file in "$@" ; do
         sudo chown `id -u`:`id -g` "$file"
     done
+}
+
+histcmd () {
+    if [ -n "$1" ]; then
+        history | grep $1 | perl -lane '{shift @F; print "@F"}' | sort -u
+    else
+        echo "Please specify what to look for in your history."
+    fi
 }
 
 unset _shell_is_interactive
