@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.9.3
+# @(#) $Revision: 1.9.5
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/utils/
@@ -55,7 +55,7 @@ __end_of_dirs
 export PATH MANPATH
 
 export TITLEBAR='\[\033]0;\h\007\]'
-export PS1="${TITLEBAR}[\h \w]\$ "
+export PS1="${TITLEBAR}\[\033[02;34m\][\h \w]$ \[\033[0m\]"
 export TERM=vt220  # we like vt220 because less keys work under it...
 export EDITOR=vi
 
@@ -190,7 +190,7 @@ case $OSTYPE in
     linux*)
         alias pstree='pstree -a -c -l -n -h -p'
         alias ls='ls --color -CF'
-        if [ `hostname` == "$home_host" ]; then
+        if [ `hostname -s` == "$home_host" ]; then
             alias gvim='gvim --remote-tab-silent'
         fi
     ;;
@@ -201,37 +201,8 @@ case $OSTYPE in
 
 esac
 
-pcolour () {
-    case $1 in
-        "")          code="01;30";;
-        black)       code="01;30";;
-        red)         code="01;31";;
-        green)       code="01;32";;
-        yellow)      code="01;34";;
-        blue)        code="01;34";;
-        bld_blue)    code="02;34";;
-        magenta)     code="01;35";;
-        bld_magenta) code="01;35";;
-        cyan)        code="01;36";;
-        white)       code="01;37";;
-        *) echo "unknown colour \"$1\"!"; return;;
-    esac
-    export PS1="\[\033[${code}m\][\h \w]\$ \[\033[0m\]"
-}
-
-ttitle () {
-# set the terminal title to something, defaults to hostname
-    case $OSTYPE in
-        linux*) echo_args="-ne" ;;
-    esac
-
-    if [ -z "$1" ]; then
-        title=`hostname`
-    else
-        title=$1
-    fi
-
-    /bin/echo $echo_args "\033]0;$title\007"
+functions () {
+    perl -ne 'next unless s|^(\w+)\s*\(\s*\)\s*{\s*|$1|; push @ff, "$_\n"; END{print sort @ff}' ~/.bashrc
 }
 
 cnf () {
@@ -247,6 +218,14 @@ who () {
 # we like to know who we are really dealing with...
   /usr/bin/who | \
     perl -ne '$gecos = (getpwnam((split)[0]))[6];
+              print $gecos, " " x (21 - length($gecos)), $_;'
+}
+
+w () {
+# we like to know who we are really dealing with...
+  /usr/bin/w | \
+    perl -ne 'print and next if /load average/;
+              $gecos = (getpwnam((split)[0]))[6];
               print $gecos, " " x (21 - length($gecos)), $_;'
 }
 
@@ -271,7 +250,24 @@ hogs () {
 perms2 () {
 # perms2 == permissions to...
 # could have called it "permsonpath" but perms2 is shorter :)
-    perl -e '$ARGV[0]=`pwd` if ( ! $ARGV[0] or $ARGV[0] eq "."); map {if($_){$f=join "/",$f,$_;system("ls -ald $f")}} split m|/|,shift' $1
+    # escape spaces
+    arg=`echo $1 | sed -e 's/\\\//g'`
+    if [ `echo $arg | grep -c "^/"` -le 0 ]; then
+        # we have a relative path
+        # convert it to absolute
+        relpath=$arg
+        D=`dirname "$relpath"`
+        B=`basename "$relpath"`
+        file="`cd \"$D\" 2>/dev/null && pwd || echo \"$D\"`/$B"
+    else
+        file=$arg
+    fi
+
+    # version below uses perl File::Spec::Unix module to convert relative paths to absolute but I don't 
+    # have that available everywhere I live either...
+    ##perl -MFile::Spec::Unix -e '$ff=`pwd` if ( ! $ARGV[0] or $ARGV[0] eq "."); $ff=File::Spec::Unix->rel2abs($ARGV[0]); map {if($_){$f=join "/",$f,$_; system("ls -ald $f")}} split m|/|, $ff' $1
+
+    perl -e '$ARGV[0]=`pwd` if ( ! $ARGV[0] or $ARGV[0] eq "."); map {if($_){$f=join "/",$f,$_;system("ls -ald $f")}} split m|/|,shift' $file
 }
 
 lstimes () {
