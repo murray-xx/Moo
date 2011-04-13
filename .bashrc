@@ -1,10 +1,10 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.9.5
+# @(#) $Revision: 1.9.6
 #
 # @(#) most recent version always available at
-# @(#)   http://github.com/murray/Moo/tree/master/utils/
+# @(#)   http://github.com/murray/Moo/tree/master/.bashrc
 #
 # Murray's .bashrc
 # with a tip of the hat to Boyd's favourite .bashrc -
@@ -250,24 +250,27 @@ hogs () {
 perms2 () {
 # perms2 == permissions to...
 # could have called it "permsonpath" but perms2 is shorter :)
-    # escape spaces
-    arg=`echo $1 | sed -e 's/\\\//g'`
-    if [ `echo $arg | grep -c "^/"` -le 0 ]; then
-        # we have a relative path
-        # convert it to absolute
-        relpath=$arg
-        D=`dirname "$relpath"`
-        B=`basename "$relpath"`
-        file="`cd \"$D\" 2>/dev/null && pwd || echo \"$D\"`/$B"
-    else
-        file=$arg
-    fi
+    file=`rel2abs $arg`
 
     # version below uses perl File::Spec::Unix module to convert relative paths to absolute but I don't 
     # have that available everywhere I live either...
     ##perl -MFile::Spec::Unix -e '$ff=`pwd` if ( ! $ARGV[0] or $ARGV[0] eq "."); $ff=File::Spec::Unix->rel2abs($ARGV[0]); map {if($_){$f=join "/",$f,$_; system("ls -ald $f")}} split m|/|, $ff' $1
 
     perl -e '$ARGV[0]=`pwd` if ( ! $ARGV[0] or $ARGV[0] eq "."); map {if($_){$f=join "/",$f,$_;system("ls -ald $f")}} split m|/|,shift' $file
+}
+
+rel2abs () {
+    relpath=$1
+    if [ `echo $relpath | grep -c "^/"` -le 0 ]; then
+        # we have a relative path
+        # convert it to absolute
+        D=`dirname "$relpath"`
+        B=`basename "$relpath"`
+        abs="`cd \"$D\" 2>/dev/null && pwd || echo \"$D\"`/$B"
+    else
+        abs=$1
+    fi
+    echo $abs
 }
 
 lstimes () {
