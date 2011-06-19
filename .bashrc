@@ -1,7 +1,7 @@
 #
 # .bashrc
 #
-# @(#) $Revision: 1.9.6
+# @(#) $Revision: 1.9.9
 #
 # @(#) most recent version always available at
 # @(#)   http://github.com/murray/Moo/tree/master/.bashrc
@@ -201,8 +201,19 @@ case $OSTYPE in
 
 esac
 
+# functions only below here...
+
 functions () {
     perl -ne 'next unless s|^(\w+)\s*\(\s*\)\s*{\s*|$1|; push @ff, "$_\n"; END{print sort @ff}' ~/.bashrc
+}
+
+inf () {
+    _UNAME=`uname -a`
+    echo $_UNAME
+    if [ `echo $_UNAME | grep -ic linux` -ge 1 ]; then
+        cat /etc/redhat-release 
+    fi
+    unset _UNAME
 }
 
 cnf () {
@@ -276,9 +287,9 @@ rel2abs () {
 lstimes () {
 # stat will show all of these if you are on an OS with stat...
     for file in "$@" ; do
-        echo -n "mtime: `ls -l "$file"`"
-        echo -n "atime: `ls -l --time=atime "$file"`"
-        echo -n "ctime: `ls -l --time=ctime "$file"`"
+        printf "mtime: `ls -ld  "$file"`\n"
+        printf "atime: `ls -lud "$file"`\n"
+        printf "ctime: `ls -lcd "$file"`\n"
     done
 }
 
@@ -290,7 +301,7 @@ own () {
 
 histcmd () {
     if [ -n "$1" ]; then
-        history | grep $1 | perl -lane '{shift @F; print "@F"}' | sort -u
+        history | grep $1 | perl -lane '{next if /histcmd '$1'/; shift @F; print "@F"}' | sort -u
     else
         echo "Please specify what to look for in your history."
     fi
