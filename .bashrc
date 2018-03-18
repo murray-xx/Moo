@@ -211,7 +211,7 @@ inf () {
     _UNAME=`uname -a`
     echo $_UNAME
     if [ `echo $_UNAME | grep -ic linux` -ge 1 ]; then
-        cat /etc/redhat-release 
+        /usr/bin/awk '/^PRETTY_NAME/{split($0,a,"="); print a[2]}' /etc/os-release
     fi
     unset _UNAME
 }
