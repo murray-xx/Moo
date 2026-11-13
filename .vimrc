@@ -38,6 +38,7 @@ endif
 "see http://vimcolorschemetest.googlecode.com/svn/html/index-c.html
 ":colorscheme mod_tcsoft 
 :colorscheme github
+highlight Normal ctermbg=NONE
 
 " Tabs
 map <C-t> :tabnew<CR>
